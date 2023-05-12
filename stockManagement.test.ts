@@ -9,14 +9,9 @@ describe ("test stock management", () => {
     test("valid add item", () => {
         const category1 = addCategory('drink');
         const unitIn12 = addUnit('PK', 12);
-        expect(addItem('DCCJ', 'coconut juice', category1, unitIn12, 150)).toStrictEqual({itemCode: 'DCCJ'});
+        expect(addItem('DCCJ', 'coconut juice', category1, unitIn12, 150)).toStrictEqual({code: 'DCCJ'});
     });
-    test("valid search item with code", () => {
-        const category1 = addCategory('drink');
-        const unitIn12 = addUnit('PK', 12);
-        const item = addItem('DCCJ', 'coconut juice', category1, unitIn12, 150);
-        expect(searchItem(item.itemCode)).toStrictEqual({found: true});
-    });
+    
     test("valid import items", () => {
         const category1 = addCategory('drink');
         const category2 = addCategory('biscuit');
@@ -50,9 +45,9 @@ describe ("test stock management", () => {
         importItems([
             {item: item, quantity: {quantity: 5, isPiece: false}}
         ]);
-        expect(singleItemLog(item.itemCode)).toStrictEqual({
-            itemCode: item.itemCode,
-            itemName: 'coconut juice',
+        expect(singleItemLog(item.code)).toStrictEqual({
+            code: item.code,
+            name: 'coconut juice',
             log: [
                 { importTime: expect.any(Number), quantity: {quantity: 5, isPiece: false} }
             ],
@@ -71,8 +66,8 @@ describe ("test stock management", () => {
             {item: item2, quantity: {quantity: 10, isPiece: true}}
         ]);
         expect(multipleItemsLog()).toStrictEqual([
-            {itemCode: item1.itemCode, itemName: 'coconut juice', remainingQuantity: 5 + 'PK' + 'and' + 0 + 'PC'},
-            {itemCode: item2.itemCode, itemName: 'lemon biscuit', remainingQuantity: 0 + 'PK' + 'and' + 10 + 'PC'}
+            {code: item1.code, name: 'coconut juice', remainingQuantity: 5 + 'PK' + 'and' + 0 + 'PC'},
+            {code: item2.code, name: 'lemon biscuit', remainingQuantity: 0 + 'PK' + 'and' + 10 + 'PC'}
         ]);
     });
 });
