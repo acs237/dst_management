@@ -14,11 +14,12 @@ export interface category {
 export interface unit {
     unitId: number;
     name: string;
+    numberItems: number;
 }
 
 export interface quantity {
     quantity: number;
-    unit: unit;
+    isPiece: boolean;
 }
 
 export interface log {
