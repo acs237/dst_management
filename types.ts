@@ -1,9 +1,18 @@
+export interface data {
+    items: item[];
+    categories: category[];
+    units: unit[];
+    logs: log[];
+}
+
 export interface item {
     code: string;
     name: string;
-    category: category;
-    unit: unit;
+    categoryId: number;
+    unitId: number;
     price: number;
+    remainingStock: number;
+    remainingStockPieces: number;
 }
 
 export interface category {
@@ -24,7 +33,8 @@ export interface quantity {
 
 export interface log {
     logId: number;
-    item: item;
+    itemCode: string;
+    itemName: string;
     importTime: number;
     exportTime: number;
     quantity: quantity;
