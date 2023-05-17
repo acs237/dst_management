@@ -1,73 +1,67 @@
+import { clearData } from "./data";
+import { addCategory, addUnit, addItem } from "./dataInput";
+import { importItems, exportItems, singleItemLog, multipleItemsLog } from "./stockManagement";
+
 describe ("test stock management", () => {
-
-    test("valid add category", () => {
-        expect(addCategory('drink')).toStrictEqual({categoryId: expect.any(Number)});
-    });
-    test("valid add unit", () => {
-        expect(addUnit('PK', 12)).toStrictEqual({unitId: expect.any(Number)});
-    });
-    test("valid add item", () => {
-        const category1 = addCategory('drink');
-        const unitIn12 = addUnit('PK', 12);
-        expect(addItem('DCCJ', 'coconut juice', category1, unitIn12, 150)).toStrictEqual({code: 'DCCJ'});
-    });
-    
-    test("valid import items", () => {
+    beforeEach(() => {
+        clearData();
+    })
+    test("test import items", () => {
         const category1 = addCategory('drink');
         const category2 = addCategory('biscuit');
-        const unitIn12 = addUnit('PK', 12);
-        const unitIn24 = addUnit('PK', 24);
-        const item1 = addItem('DCCJ', 'coconut juice', category1, unitIn12, 150);
-        const item2 = addItem('BLMB', 'lemon biscuit', category2, unitIn24, 50);
-        expect(importItems([
-            {item: item1, quantity: {quantity: 5, isPiece: false}}, 
-            {item: item2, quantity: {quantity: 10, isPiece: true}}])).toStrictEqual({});
+        const unitIn12 = addUnit('PK12', 12);
+        const unitIn24 = addUnit('PK24', 24);
+        const item1 = addItem('DCCJ', 'coconut juice', category1.categoryId, unitIn12.unitId, 150);
+        const item2 = addItem('BLMB', 'lemon biscuit', category2.categoryId, unitIn24.unitId, 50);
+        expect(importItems(item1.code, 5, false)).toStrictEqual({logId: expect.any(Number)});
+        expect(importItems(item2.code, 10, true)).toStrictEqual({logId: expect.any(Number)});
+        expect(importItems(item1.code, 6, true)).toStrictEqual({logId: expect.any(Number)});
     });
-    test("valid export items", () => {
+    test("test export items", () => {
         const category1 = addCategory('drink');
         const category2 = addCategory('biscuit');
-        const unitIn12 = addUnit('PK', 12);
-        const unitIn24 = addUnit('PK', 24);
-        const item1 = addItem('DCCJ', 'coconut juice', category1, unitIn12, 150);
-        const item2 = addItem('BLMB', 'lemon biscuit', category2, unitIn24, 50);
-        importItems([
-            {item: item1, quantity: {quantity: 5, isPiece: false}}, 
-            {item: item2, quantity: {quantity: 10, isPiece: true}}
-        ]);
-
-        expect(exportItems([{item: item1, quantity: {quantity: 2, isPiece: false}}, 
-            {item: item2, quantity: {quantity: 10, isPiece: true}}])).toStrictEqual({});
+        const unitIn12 = addUnit('PK12', 12);
+        const unitIn24 = addUnit('PK24', 24);
+        const item1 = addItem('DCCJ', 'coconut juice', category1.categoryId, unitIn12.unitId, 150);
+        const item2 = addItem('BLMB', 'lemon biscuit', category2.categoryId, unitIn24.unitId, 50);
+        importItems(item1.code, 5, false);
+        importItems(item2.code, 10, true);
+        expect(exportItems(item1.code, 2, false)).toStrictEqual({logId: expect.any(Number)});
+        expect(exportItems(item2.code, 10, true)).toStrictEqual({logId: expect.any(Number)});
+        expect(exportItems(item2.code, 3, false)).toStrictEqual({error: expect.any(String)});
     });
-    test("valid request stock data for single item", () => {
+            
+    test("test request stock data for single item", () => {
         const category1 = addCategory('drink');
-        const unitIn12 = addUnit('PK', 12);
-        const item = addItem('DCCJ', 'coconut juice', category1, unitIn12, 150);
-        importItems([
-            {item: item, quantity: {quantity: 5, isPiece: false}}
-        ]);
+        const unitIn12 = addUnit('PK12', 12);
+        const item = addItem('DCCJ', 'coconut juice', category1.categoryId, unitIn12.unitId, 150);
+        importItems(item.code, 5, false);
+        exportItems(item.code, 20, true);
         expect(singleItemLog(item.code)).toStrictEqual({
-            code: item.code,
-            name: 'coconut juice',
-            log: [
-                { importTime: expect.any(Number), quantity: {quantity: 5, isPiece: false} }
+            logs: [
+                {logId: expect.any(Number), itemCode: item.code, itemName: 'coconut juice', importTime: expect.any(Number), exportTime: -1, quantity: {quantity: 5, isPiece: false}},
+                {logId: expect.any(Number), itemCode: item.code, itemName: 'coconut juice', importTime: -1, exportTime: expect.any(Number), quantity: {quantity: 20, isPiece: true}}
             ],
-            remainingQuantity: 5 + 'PK' + 'and' + 0 + 'PC'
+            remainingStock: '3 PK12 and 4 Pieces'
         });
     });
-    test("valid request for multiple items", () => {
+    test("test request for multiple items", () => {
         const category1 = addCategory('drink');
         const category2 = addCategory('biscuit');
-        const unitIn12 = addUnit('PK', 12);
-        const unitIn24 = addUnit('PK', 24);
-        const item1 = addItem('DCCJ', 'coconut juice', category1, unitIn12, 150);
-        const item2 = addItem('BLMB', 'lemon biscuit', category2, unitIn24, 50);
-        importItems([
-            {item: item1, quantity: {quantity: 5, isPiece: false}}, 
-            {item: item2, quantity: {quantity: 10, isPiece: true}}
-        ]);
-        expect(multipleItemsLog()).toStrictEqual([
-            {code: item1.code, name: 'coconut juice', remainingQuantity: 5 + 'PK' + 'and' + 0 + 'PC'},
-            {code: item2.code, name: 'lemon biscuit', remainingQuantity: 0 + 'PK' + 'and' + 10 + 'PC'}
-        ]);
+        const unitIn12 = addUnit('PK12', 12);
+        const unitIn24 = addUnit('PK24', 24);
+        const item1 = addItem('DCCJ', 'coconut juice', category1.categoryId, unitIn12.unitId, 150);
+        const item2 = addItem('BLMB', 'lemon biscuit', category2.categoryId, unitIn24.unitId, 50);
+        importItems(item1.code, 5, false);
+        importItems(item2.code, 10, true);
+        importItems(item2.code, 24, true);
+        exportItems(item1.code, 10, true);
+        importItems(item1.code, 7, true);
+        expect(exportItems(item1.code, 6, false)).toStrictEqual({error: expect.any(String)});
+        expect(multipleItemsLog()).toStrictEqual({
+            logs: [
+                {itemCode: item1.code, itemName: 'coconut juice', remainingStock: '4 PK12 and 9 Pieces'},
+                {itemCode: item2.code, itemName: 'lemon biscuit', remainingStock: '1 PK24 and 10 Pieces'}
+            ]});
     });
 });
